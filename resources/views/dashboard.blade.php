@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PakcoyAI — Sistem Prediksi Cerdas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green-900:#0f2e1a;
+  --green-800:#163d24;
+  --green-700:#1d522f;
+  --green-600:#256639;
+  --green-500:#2e7d44;
+  --green-400:#3b9955;
+  --green-300:#4db86a;
+  --green-200:#86d49a;
+  --green-100:#c3eecf;
+  --green-50:#edf8f0;
+  --teal:#1d9e75;
+  --teal-light:#e1f5ee;
+  --teal-dark:#0f6e56;
+  --amber:#ba7517;
+  --amber-light:#faeeda;
+  --red:#a32d2d;
+  --red-light:#fcebeb;
+  --cream:#f7f5f0;
+  --cream-2:#efede8;
+  --white:#ffffff;
+  --text-dark:#111a13;
+  --text-mid:#3a4a3e;
+  --text-muted:#7a8c7f;
+  --text-faint:#b0bcb5;
+  --border:#d8e4db;
+  --border-strong:#bfcfc4;
+  --sidebar-w:220px;
+  --font:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:14px;
+  --r-xl:20px;
+}
+html,body{font-family:var(--font);background:var(--cream);color:var(--text-dark);min-height:100vh;font-size:14px;line-height:1.6}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--green-900);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:relative}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--teal);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
+.logo-icon i{font-size:18px;color:#fff}
+.logo-text{font-size:16px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+.logo-sub{font-size:11px;color:rgba(255,255,255,0.45);margin-top:1px}
+.sidebar-section{padding:20px 12px 8px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);margin:1px 8px;cursor:pointer;transition:background 0.15s;color:rgba(255,255,255,0.55);font-size:13px;font-weight:500;border:none;background:none;width:calc(100% - 16px);text-align:left}
+.nav-item i{font-size:17px;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.85)}
+.nav-item.active{background:rgba(29,158,117,0.2);color:#86d49a}
+.nav-item.active i{color:#4db86a}
+.sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08)}
+.server-status{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:var(--r-sm);border:1px solid rgba(255,255,255,0.08)}
+.s-dot{width:8px;height:8px;border-radius:50%;background:#e24b4a;flex-shrink:0}
+.s-dot.on{background:#4db86a;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.s-text{flex:1;min-width:0}
+.s-label{font-size:11px;font-weight:600;color:rgba(255,255,255,0.6)}
+.s-url{font-size:10px;font-family:var(--mono);color:rgba(255,255,255,0.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ping-btn{font-size:11px;padding:3px 8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:rgba(255,255,255,0.5);cursor:pointer;white-space:nowrap}
+.ping-btn:hover{background:rgba(255,255,255,0.14)}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-size:16px;font-weight:600;color:var(--text-dark)}
+.topbar-sub{font-size:12px;color:var(--text-muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:background 0.15s}
+.btn-outline{background:transparent;border:1px solid var(--border-strong);color:var(--text-mid)}
+.btn-outline:hover{background:var(--cream-2)}
+
+/* ── CONTENT ── */
+.content{flex:1;padding:28px;overflow-y:auto;display:flex;flex-direction:column;gap:24px}
+
+/* ── STAT CARDS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-lg) var(--r-lg) 0 0}
+.stat-card.green::before{background:var(--green-400)}
+.stat-card.teal::before{background:var(--teal)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.red::before{background:var(--red)}
+.stat-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat-card.green .stat-icon{background:var(--green-50)}
+.stat-card.green .stat-icon i{color:var(--green-500)}
+.stat-card.teal .stat-icon{background:var(--teal-light)}
+.stat-card.teal .stat-icon i{color:var(--teal-dark)}
+.stat-card.amber .stat-icon{background:var(--amber-light)}
+.stat-card.amber .stat-icon i{color:var(--amber)}
+.stat-card.red .stat-icon{background:var(--red-light)}
+.stat-card.red .stat-icon i{color:var(--red)}
+.stat-icon i{font-size:18px}
+.stat-value{font-size:26px;font-weight:700;color:var(--text-dark);line-height:1;margin-bottom:4px;font-family:var(--mono)}
+.stat-label{font-size:12px;color:var(--text-muted);font-weight:500}
+.stat-trend{font-size:11px;margin-top:6px;font-weight:600}
+.stat-trend.up{color:var(--green-500)}
+.stat-trend.down{color:var(--red)}
+.stat-trend.neutral{color:var(--text-faint)}
+
+/* ── GRID PANELS ── */
+.panel-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.panel-full{grid-column:1/-1}
+.panel-header{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:14px;font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+.panel-title i{font-size:16px;color:var(--text-muted)}
+.panel-meta{font-size:11px;color:var(--text-muted)}
+.panel-body{padding:22px}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge-green{background:var(--green-50);color:var(--green-600)}
+.badge-teal{background:var(--teal-light);color:var(--teal-dark)}
+.badge-amber{background:var(--amber-light);color:var(--amber)}
+.badge-red{background:var(--red-light);color:var(--red)}
+.badge-gray{background:var(--cream-2);color:var(--text-muted)}
+.ep-tag{font-family:var(--mono);font-size:10px;background:var(--cream);border:1px solid var(--border);color:var(--text-muted);padding:2px 7px;border-radius:4px}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r-md);padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--cream)}
+.upload-zone:hover{border-color:var(--teal);background:var(--teal-light)}
+.upload-zone.has-file{border-color:var(--green-400);background:var(--green-50);border-style:solid}
+.upload-zone i{font-size:32px;color:var(--text-faint);display:block;margin-bottom:8px}
+.upload-zone.has-file i{color:var(--green-500)}
+.upload-text{font-size:13px;color:var(--text-muted);font-weight:500}
+.upload-zone.has-file .upload-text{color:var(--green-600)}
+.upload-hint{font-size:11px;color:var(--text-faint);margin-top:4px}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-preview{width:100%;height:150px;object-fit:cover;border-radius:var(--r-md);margin-top:14px;display:none;border:1px solid var(--border)}
+
+/* ── FORM ELEMENTS ── */
+.field-group{margin-bottom:16px}
+.field-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px}
+textarea{width:100%;font-family:var(--mono);font-size:12px;border:1px solid var(--border);border-radius:var(--r-md);padding:12px;resize:vertical;min-height:148px;color:var(--text-dark);background:var(--cream);line-height:1.6;transition:border-color 0.15s}
+textarea:focus{outline:none;border-color:var(--teal);background:var(--white)}
+
+/* ── METRIC MINI ── */
+.metric-mini-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.metric-mini{background:var(--cream);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px}
+.metric-mini-label{font-size:11px;color:var(--text-muted);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.metric-mini-label i{font-size:13px}
+.metric-mini-val{font-size:20px;font-weight:700;color:var(--text-dark);font-family:var(--mono)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 18px;border-radius:var(--r-md);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all 0.15s;width:100%}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.btn:active:not(:disabled){transform:scale(0.98)}
+.btn i{font-size:16px}
+.btn-green{background:var(--green-800);color:#fff}
+.btn-green:hover:not(:disabled){background:var(--green-700)}
+.btn-teal{background:var(--teal-dark);color:#fff}
+.btn-teal:hover:not(:disabled){background:var(--teal)}
+
+/* ── RESULT PANEL ── */
+.result-wrap{margin-top:16px;display:none}
+.result-card{border-radius:var(--r-md);padding:16px 18px;border:1px solid transparent}
+.result-idle{background:var(--cream);border-color:var(--border)}
+.result-loading{background:var(--cream);border-color:var(--border)}
+.result-success{background:var(--green-50);border-color:var(--green-100)}
+.result-error{background:var(--red-light);border-color:#f7c1c1}
+.result-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px}
+.result-idle .result-eyebrow,.result-loading .result-eyebrow{color:var(--text-faint)}
+.result-success .result-eyebrow{color:var(--green-500)}
+.result-error .result-eyebrow{color:var(--red)}
+.result-main{font-size:28px;font-weight:700;font-family:var(--mono);line-height:1;margin-bottom:6px}
+.result-idle .result-main,.result-loading .result-main{color:var(--text-faint)}
+.result-success .result-main{color:var(--green-700)}
+.result-error .result-main{font-size:14px;color:var(--red)}
+.result-sub{font-size:12px;color:var(--text-muted)}
+.result-success .result-sub{color:var(--green-600)}
+.result-divider{height:1px;background:var(--border);margin:12px 0}
+.result-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.result-row-label{color:var(--text-muted)}
+.result-row-val{font-weight:600;color:var(--text-dark);font-family:var(--mono)}
+
+/* ── GAUGE ── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:8px 0}
+.gauge-svg{overflow:visible}
+.gauge-track{fill:none;stroke:var(--cream-2);stroke-width:14;stroke-linecap:round}
+.gauge-bar{fill:none;stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1),stroke 0.6s}
+.gauge-val{font-family:var(--mono);font-size:28px;font-weight:700;fill:var(--text-dark);text-anchor:middle}
+.gauge-unit{font-size:13px;fill:var(--text-muted);text-anchor:middle}
+.gauge-status-text{font-size:12px;fill:var(--text-muted);text-anchor:middle}
+.gauge-ticks text{font-size:10px;fill:var(--text-faint);text-anchor:middle;font-family:var(--mono)}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;height:180px}
+
+/* ── HISTORY TABLE ── */
+.hist-table{width:100%;border-collapse:collapse;font-size:12px}
+.hist-table th{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;padding:6px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.hist-table td{padding:8px 10px;border-bottom:1px solid var(--cream-2);color:var(--text-dark);font-family:var(--mono)}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-table tr:hover td{background:var(--cream)}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.pill-kering{background:var(--amber-light);color:var(--amber)}
+.pill-ideal{background:var(--green-50);color:var(--green-600)}
+.pill-basah{background:#e6f1fb;color:#185fa5}
+
+/* ── SPINNER ── */
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar { position: fixed; left: -250px; top: 0; bottom: 0; z-index: 1000; transition: left 0.3s ease; box-shadow: 4px 0 15px rgba(0,0,0,0.2); }
+  .sidebar.open { left: 0; }
+  #menuBtn { display: block !important; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .panel-row { grid-template-columns: 1fr; }
+}
+@media(max-width:600px){
+  .stat-row { grid-template-columns: 1fr; }
+  .content { padding: 16px; }
+  .topbar { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon"><i class="ti ti-plant-2" aria-hidden="true"></i></div>
+        <div>
+          <div class="logo-text">PakcoyAI</div>
+          <div class="logo-sub">Sistem Prediksi Cerdas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">Navigasi</div>
+    <button class="nav-item active" onclick="switchTab('dashboard',this)">
+      <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard
+    </button>
+    <button class="nav-item" onclick="switchTab('visual',this)">
+      <i class="ti ti-camera" aria-hidden="true"></i> Deteksi Visual
+    </button>
+    <button class="nav-item" onclick="switchTab('sensor',this)">
+      <i class="ti ti-wave-sine" aria-hidden="true"></i> Prediksi Sensor
+    </button>
+
+    <div class="sidebar-section">Sistem</div>
+    <button class="nav-item" onclick="switchTab('riwayat',this)">
+      <i class="ti ti-history" aria-hidden="true"></i> Riwayat Prediksi
+    </button>
+    <button class="nav-item" onclick="switchTab('pengaturan',this)">
+      <i class="ti ti-settings" aria-hidden="true"></i> Pengaturan
+    </button>
+
+    <div class="sidebar-bottom">
+      <div class="server-status">
+        <div class="s-dot" id="sDot"></div>
+        <div class="s-text">
+          <div class="s-label" id="sLabel">Tidak terhubung</div>
+          <div class="s-url" id="sUrl">—</div>
+        </div>
+        <button class="ping-btn" onclick="doPing()" id="pingBtn">Ping</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="topbar-btn btn-outline" id="menuBtn" style="display:none; padding:6px 10px;" onclick="toggleMenu()">
+          <i class="ti ti-menu-2" style="font-size:18px"></i>
+        </button>
+        <div>
+          <div class="topbar-title" id="topbarTitle">Dashboard</div>
+          <div class="topbar-sub" id="topbarSub">Ringkasan sistem prediksi pakcoy</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn btn-outline" onclick="doPing()">
+          <i class="ti ti-refresh" style="font-size:14px" aria-hidden="true"></i> Cek Koneksi
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div id="tab-dashboard">
+        <div class="stat-row">
+          <div class="stat-card green">
+            <div class="stat-icon"><i class="ti ti-droplet" aria-hidden="true"></i></div>
+            <div class="stat-value" id="dashHumid">73.8%</div>
+            <div class="stat-label">Kelembapan saat ini</div>
+            <div class="stat-trend down" id="dashHumidTrend"><i class="ti ti-trending-down" style="font-size:12px"></i> Menurun dari 76.6%</div>
+          </div>
+          <div class="stat-card teal">
+            <div class="stat-icon"><i class="ti ti-temperature" aria-hidden="true"></i></div>
+            <div class="stat-value" id="dashTemp">29.5°C</div>
+            <div class="stat-label">Suhu saat ini</div>
+            <div class="stat-trend down" style="color:var(--amber)" id="dashTempTrend"><i class="ti ti-trending-up" style="font-size:12px"></i> Meningkat dari 25.4°C</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-icon"><i class="ti ti-brain" aria-hidden="true"></i></div>
+            <div class="stat-value" id="dashLastPred">—</div>
+            <div class="stat-label">Prediksi terakhir</div>
+            <div class="stat-trend neutral" id="dashPredStatus">Belum ada prediksi</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-icon"><i class="ti ti-clock" aria-hidden="true"></i></div>
+            <div class="stat-value" id="dashTime">—</div>
+            <div class="stat-label">Waktu respons API</div>
+            <div class="stat-trend neutral" id="dashPingStatus">Belum diuji</div>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div class="panel" style="grid-column:1/-1">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Tren Kelembapan &amp; Suhu (10 data terakhir)</div>
+              <span class="badge badge-green">Live Preview</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-row">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-gauge" aria-hidden="true"></i> Gauge Kelembapan</div>
+              <span class="ep-tag">Real-time</span>
+            </div>
+            <div class="panel-body">
+              <div class="gauge-wrap">
+                <svg class="gauge-svg" viewBox="0 0 200 130" width="200" height="130" aria-label="Gauge kelembapan">
+                  <path class="gauge-track" d="M 25 115 A 75 75 0 0 1 175 115" />
+                  <path class="gauge-bar" id="gaugeBar" d="M 25 115 A 75 75 0 0 1 175 115" stroke="#1d9e75" />
+                  <text class="gauge-val" id="gaugeVal" x="100" y="100">73.8</text>
+                  <text class="gauge-unit" x="100" y="118">%</text>
+                  <text x="22" y="128" style="font-size:10px;fill:var(--text-faint);font-family:var(--mono)">0</text>
+                  <text x="93" y="26" style="font-size:10px;fill:var(--text-faint);font-family:var(--mono)">50</text>
+                  <text x="174" y="128" style="font-size:10px;fill:var(--text-faint);font-family:var(--mono)">100</text>
+                </svg>
+                <div id="gaugeLabel" style="font-size:13px;font-weight:600;color:var(--green-600);margin-top:-4px">Kondisi ideal</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Threshold ideal: 60–75%</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-table" aria-hidden="true"></i> Log Sensor Terkini</div>
+              <span class="panel-meta">10 entri terakhir</span>
+            </div>
+            <div class="panel-body" style="padding:0">
+              <table class="hist-table" id="logTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Kelembapan</th>
+                    <th>Suhu</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="logTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-visual" style="display:none">
+        <div class="panel-row">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-camera" aria-hidden="true"></i> Input Gambar</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="badge badge-green">CNN</span>
+                <span class="ep-tag">POST /predict-image</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="field-group">
+                <label class="field-label" for="imageInput">Unggah foto daun pakcoy</label>
+                <div class="upload-zone" id="uploadZone">
+                  <i class="ti ti-cloud-upload" id="uploadIcon" aria-hidden="true"></i>
+                  <div class="upload-text" id="uploadText">Klik atau seret gambar ke sini</div>
+                  <div class="upload-hint" id="uploadHint">Format: JPG, PNG, WEBP — Maks. 10 MB</div>
+                  <input type="file" id="imageInput" accept="image/*" onchange="handleFile(this)" aria-label="Upload foto daun pakcoy">
+                </div>
+                <img id="imgPreview" class="img-preview" alt="Preview gambar">
+              </div>
+              <button class="btn btn-green" id="imgBtn" onclick="runImageAPI()">
+                 <i class="ti ti-brain" aria-hidden="true"></i> Mulai Analisis CNN
+              </button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-report-analytics" aria-hidden="true"></i> Hasil Deteksi</div>
+              <span id="cnnBadge" class="badge badge-gray">Menunggu input</span>
+            </div>
+            <div class="panel-body">
+              <div class="result-wrap" id="imgResultWrap" style="display:block">
+                <div class="result-card result-idle" id="imgResultCard">
+                  <div class="result-eyebrow" id="imgEyebrow">Status model CNN</div>
+                  <div class="result-main" id="imgMain">—</div>
+                  <div class="result-sub" id="imgSub">Unggah gambar dan klik Mulai Analisis</div>
+                </div>
+              </div>
+
+              <div id="imgDetails" style="display:none;margin-top:16px">
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Akurasi model</span><span class="result-row-val" id="imgAccuracy">—</span></div>
+                <div class="result-row"><span class="result-row-label">Waktu inferensi</span><span class="result-row-val" id="imgTime">—</span></div>
+                <div class="result-row"><span class="result-row-label">Endpoint</span><span class="result-row-val">/predict-image</span></div>
+                <div class="result-row"><span class="result-row-label">Metode</span><span class="result-row-val">POST · multipart/form-data</span></div>
+               </div>
+
+              <div style="margin-top:20px;padding:14px;background:var(--cream);border-radius:var(--r-md);border:1px solid var(--border)">
+                <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Kelas yang dikenali</div>
+                <div style="display:flex;flex-direction:column;gap:6px" id="classLegend">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;align-items:center;gap:8px">
+                       <div style="width:8px;height:8px;border-radius:50%;background:var(--green-400)"></div>
+                      <span style="font-size:12px;color:var(--text-dark)">Siap Panen</span>
+                    </div>
+                    <span id="cls-siap" class="badge badge-green" style="display:none">Terdeteksi</span>
+                   </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div>
+                      <span style="font-size:12px;color:var(--text-dark)">Dalam Pertumbuhan</span>
+                     </div>
+                    <span id="cls-tumbuh" class="badge badge-amber" style="display:none">Terdeteksi</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>
+                      <span style="font-size:12px;color:var(--text-dark)">Tidak Sehat</span>
+                    </div>
+                    <span id="cls-sakit" class="badge badge-red" style="display:none">Terdeteksi</span>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-sensor" style="display:none">
+        <div class="panel-row">
+           <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-database" aria-hidden="true"></i> Data Historis Sensor</div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="badge badge-teal">LSTM</span>
+                <span class="ep-tag">POST /predict-sensor</span>
+               </div>
+            </div>
+            <div class="panel-body">
+              <div style="font-size:12px;color:var(--text-muted);background:var(--cream);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:14px;display:flex;align-items:flex-start;gap:8px">
+                <i class="ti ti-info-circle" style="font-size:15px;margin-top:1px;flex-shrink:0;color:var(--teal)" aria-hidden="true"></i>
+                <span>Masukkan 10 entri terakhir dalam format <code style="font-family:var(--mono);font-size:11px;background:var(--cream-2);padding:1px 5px;border-radius:3px">[kelembapan%, suhu&deg;C]</code>. Model LSTM akan memprediksi nilai kelembapan 30 menit ke depan.</span>
+              </div>
+
+              <div class="metric-mini-row">
+                <div class="metric-mini">
+                  <div class="metric-mini-label"><i class="ti ti-droplet" aria-hidden="true"></i> Kelembapan terkini</div>
+                  <div class="metric-mini-val" id="sLiveHumid">—</div>
+                 </div>
+                <div class="metric-mini">
+                  <div class="metric-mini-label"><i class="ti ti-temperature" aria-hidden="true"></i> Suhu terkini</div>
+                  <div class="metric-mini-val" id="sLiveTemp">—</div>
+                </div>
+               </div>
+
+              <div class="field-group">
+                <label class="field-label" for="sensorInput">Array JSON — 10 log [kelembapan, suhu]</label>
+                <textarea id="sensorInput" spellcheck="false">[[76.6,25.4],[76.1,24.6],[76.1,22.6],[75.8,23.3],[75.4,25.0],[75.1,26.1],[74.9,27.5],[74.5,28.2],[74.1,29.1],[73.8,29.5]]</textarea>
+              </div>
+              <button class="btn btn-teal" id="sensorBtn" onclick="runSensorAPI()">
+                 <i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i> Prediksi 30 Menit ke Depan
+              </button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-gauge" aria-hidden="true"></i> Hasil Prediksi LSTM</div>
+              <span id="lstmBadge" class="badge badge-gray">Menunggu input</span>
+            </div>
+            <div class="panel-body">
+              <div class="result-card result-idle" id="sensorResultCard">
+                <div class="result-eyebrow" id="sensorEyebrow">Prediksi kelembapan</div>
+                <div class="result-main" id="sensorMain">—</div>
+                 <div class="result-sub" id="sensorSub">Masukkan data sensor dan klik Prediksi</div>
+              </div>
+
+              <div id="sensorDetails" style="display:none;margin-top:16px">
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Rekomendasi tindakan</span><span class="result-row-val" id="sRekomendasi">—</span></div>
+                 <div class="result-row"><span class="result-row-label">Waktu inferensi</span><span class="result-row-val" id="sTime">—</span></div>
+                <div class="result-row"><span class="result-row-label">Jumlah entri input</span><span class="result-row-val" id="sCount">—</span></div>
+                <div class="result-row"><span class="result-row-label">Endpoint</span><span class="result-row-val">/predict-sensor</span></div>
+              </div>
+
+              <div style="margin-top:20px">
+                <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Skala ambang batas</div>
+                 <div style="display:flex;flex-direction:column;gap:7px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:6px;border-radius:3px;background:var(--amber);flex-shrink:0"></div>
+                    <span style="font-size:12px;color:var(--text-dark)">Kering — <span style="color:var(--text-muted)">&lt; 60%</span></span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:6px;border-radius:3px;background:var(--green-400);flex-shrink:0"></div>
+                    <span style="font-size:12px;color:var(--text-dark)">Ideal — <span style="color:var(--text-muted)">60–75%</span></span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:34px;height:6px;border-radius:3px;background:#185fa5;flex-shrink:0"></div>
+                    <span style="font-size:12px;color:var(--text-dark)">Basah — <span style="color:var(--text-muted)">&gt; 75%</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-riwayat" style="display:none">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-history" aria-hidden="true"></i> Riwayat Prediksi Sesi Ini</div>
+            <button class="topbar-btn btn-outline" style="width:auto;font-size:12px;padding:5px 12px" onclick="clearHistory()">
+              <i class="ti ti-trash" style="font-size:13px" aria-hidden="true"></i> Hapus
+            </button>
+           </div>
+          <div class="panel-body" style="padding:0">
+            <table class="hist-table" id="histTable">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Tipe</th>
+                   <th>Hasil</th>
+                  <th>Detail</th>
+                  <th>Latensi</th>
+                </tr>
+              </thead>
+<tbody id="histBody">
+    @forelse($riwayat as $row)
+        <tr>
+             <td>{{ \Carbon\Carbon::parse($row->created_at)->format('H:i:s') }}</td>
+            <td>
+                <span class="badge {{ $row->jenis_fitur === 'CNN' ? 'badge-green' : 'badge-teal' }}">
+                    {{ $row->jenis_fitur }}
+                </span>
+            </td>
+            <td><strong>{{ $row->hasil_prediksi }}</strong></td>
+            <td style="color:var(--text-muted); font-family:var(--font)">
+                {{ $row->tingkat_akurasi ? 'Akurasi: ' . $row->tingkat_akurasi . '%' : 'Rekomendasi tindakan tercatat' }}
+            </td>
+            <td>—</td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="5" style="text-align:center; padding:32px; color:var(--text-faint)">
+                Belum ada riwayat prediksi di database MySQL
+            </td>
+        </tr>
+    @endforelse
+</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-pengaturan" style="display:none">
+        <div class="panel-row">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-server" aria-hidden="true"></i> Konfigurasi Server</div>
+            </div>
+            <div class="panel-body">
+              
+              <div style="padding:14px;background:var(--cream);border-radius:var(--r-md);border:1px solid var(--border)">
+                 <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:10px">Endpoint yang digunakan</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span class="ep-tag">POST /predict-image</span>
+                    <span style="font-size:12px;color:var(--text-muted)">Prediksi gambar CNN</span>
+                   </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span class="ep-tag">POST /predict-sensor</span>
+                    <span style="font-size:12px;color:var(--text-muted)">Prediksi sensor LSTM</span>
+                  </div>
+                   <div style="display:flex;align-items:center;justify-content:space-between">
+                    <span class="ep-tag">GET /health</span>
+                    <span style="font-size:12px;color:var(--text-muted)">Cek status server</span>
+                  </div>
+                </div>
+               </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title"><i class="ti ti-info-circle" aria-hidden="true"></i> Tentang Sistem</div>
+            </div>
+            <div class="panel-body">
+               <div style="display:flex;flex-direction:column;gap:12px">
+                <div class="result-row"><span class="result-row-label">Nama sistem</span><span class="result-row-val">PakcoyAI</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Model visual</span><span class="result-row-val">CNN (TensorFlow/Keras)</span></div>
+                <div class="result-row"><span class="result-row-label">Model sensor</span><span class="result-row-val">LSTM (TensorFlow/Keras)</span></div>
+                 <div class="result-row"><span class="result-row-label">Backend</span><span class="result-row-val">Python Flask</span></div>
+                <div class="result-row"><span class="result-row-label">Tanaman target</span><span class="result-row-val">Pakcoy (Brassica rapa)</span></div>
+                <div class="result-divider"></div>
+                <div class="result-row"><span class="result-row-label">Kelas kelembapan</span><span class="result-row-val">Kering / Ideal / Basah</span></div>
+                <div class="result-row"><span class="result-row-label">Interval prediksi</span><span class="result-row-val">30 menit ke depan</span></div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div></div></div><script>
+const DEFAULT_DATA = [[76.6,25.4],[76.1,24.6],[76.1,22.6],[75.8,23.3],[75.4,25.0],[75.1,26.1],[74.9,27.5],[74.5,28.2],[74.1,29.1],[73.8,29.5]];
+const predHistory = [];
+let trendChart = null;
+
+// ==========================================
+// KUNCI PENGATURAN URL FLASK DI SINI
+// ==========================================
+function getBase(){ 
+    // Jika mau dites dari HP menggunakan WiFi yang sama dengan laptop:
+    // Ganti 127.0.0.1 menjadi alamat IPv4 laptopmu (contoh: 'http://192.168.1.15:5001')
+    return 'https://kelompok.online'; 
+}
+
+function toggleMenu() {
+    document.querySelector('.sidebar').classList.toggle('open');
+}
+
+function switchTab(name, el){
+  ['dashboard','visual','sensor','riwayat','pengaturan'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name?'':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',visual:'Deteksi Visual',sensor:'Prediksi Sensor',riwayat:'Riwayat Prediksi',pengaturan:'Pengaturan'};
+  const subs = {dashboard:'Ringkasan sistem prediksi pakcoy',visual:'Analisis gambar daun dengan model CNN',sensor:'Prediksi kelembapan tanah dengan model LSTM',riwayat:'Log semua prediksi sesi ini',pengaturan:'Konfigurasi server dan sistem'};
+  document.getElementById('topbarTitle').textContent = titles[name]||'';
+  document.getElementById('topbarSub').textContent = subs[name]||'';
+  
+  // Tutup sidebar otomatis di versi HP saat tab diklik
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+async function doPing(){
+  const dot = document.getElementById('sDot');
+  const label = document.getElementById('sLabel');
+  const url = document.getElementById('sUrl');
+  const pb = document.getElementById('pingBtn');
+  pb.textContent = '...';
+  const t0 = Date.now();
+  try{
+    await fetch(getBase()+'/health',{method:'GET',signal:AbortSignal.timeout(4000)});
+    const ms = Date.now()-t0;
+    dot.classList.add('on');
+    label.textContent = 'Server aktif';
+    url.textContent = getBase();
+    document.getElementById('dashTime').textContent = ms+'ms';
+    document.getElementById('dashPingStatus').textContent = 'Respons normal';
+    document.getElementById('dashPingStatus').style.color = 'var(--green-500)';
+    pb.textContent = 'Online';
+  }catch(e){
+    dot.classList.remove('on');
+    label.textContent = 'Tidak terhubung';
+    url.textContent = 'Gagal';
+    document.getElementById('dashTime').textContent = '—';
+    document.getElementById('dashPingStatus').textContent = 'Tidak terjangkau';
+    pb.textContent = 'Ping';
+  }
+}
+
+function getSensorStatus(v){
+  if(v<60) return {label:'Kering',rec:'Segera lakukan penyiraman',cls:'result-error',badge:'badge-amber',pillCls:'pill-kering'};
+  if(v<=75) return {label:'Ideal',rec:'Kondisi optimal, tidak perlu penyiraman',cls:'result-success',badge:'badge-green',pillCls:'pill-ideal'};
+  return {label:'Basah',rec:'Kurangi intensitas penyiraman',cls:'result-card',badge:'badge badge-teal',pillCls:'pill-basah'};
+}
+
+function handleFile(input){
+  const file = input.files[0]; if(!file) return;
+  const zone = document.getElementById('uploadZone');
+  document.getElementById('uploadIcon').className = 'ti ti-circle-check';
+  document.getElementById('uploadText').textContent = file.name;
+  document.getElementById('uploadHint').textContent = (file.size/1024).toFixed(0)+' KB · Siap dianalisis';
+  zone.classList.add('has-file');
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = document.getElementById('imgPreview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runImageAPI(){
+  const fi = document.getElementById('imageInput');
+  if(!fi.files.length){ alert('Pilih gambar terlebih dahulu!'); return; }
+  const btn = document.getElementById('imgBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Menganalisis...';
+  setImgResult('loading','Memproses gambar...','Mengirim ke model CNN...','—');
+  document.getElementById('imgDetails').style.display = 'none';
+  const fd = new FormData(); fd.append('file',fi.files[0]);
+  const t0 = Date.now();
+  try{
+    const r = await fetch(getBase()+'/predict-image',{method:'POST',body:fd});
+    const d = await r.json();
+    const ms = ((Date.now()-t0)/1000).toFixed(2);
+    if(d.status==='success'){
+      const pred = d.prediksi.toLowerCase();
+      setImgResult('success','Hasil deteksi CNN',d.prediksi.toUpperCase(),'Prediksi berhasil dilakukan');
+      document.getElementById('imgAccuracy').textContent = d.akurasi+'%';
+      document.getElementById('imgTime').textContent = ms+'s';
+      document.getElementById('imgDetails').style.display = 'block';
+      document.getElementById('cnnBadge').className = 'badge badge-green';
+      document.getElementById('cnnBadge').textContent = 'Berhasil';
+      
+      // PERBAIKAN BUG LOGIKA KELAS
+      ['cls-siap','cls-tumbuh','cls-sakit'].forEach(id=>document.getElementById(id).style.display='none');
+      
+      if(pred.includes('belum') || pred.includes('tumbuh') || pred.includes('muda')){ 
+          document.getElementById('cls-tumbuh').style.display='';
+      } else if(pred.includes('siap') || pred.includes('panen') || pred.includes('matang')){ 
+          document.getElementById('cls-siap').style.display='';
+      } else { 
+          document.getElementById('cls-sakit').style.display='';
+      }
+      
+      addHistory('CNN',d.prediksi.toUpperCase(),'Akurasi: '+d.akurasi+'%',ms+'s');
+    } else { throw new Error(d.error||'Status tidak diketahui'); }
+  }catch(e){
+    setImgResult('error','Gagal terhubung','— Error —',e.message||'Pastikan Flask berjalan');
+    document.getElementById('cnnBadge').className = 'badge badge-red';
+    document.getElementById('cnnBadge').textContent = 'Error';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-brain" aria-hidden="true"></i> Mulai Analisis CNN';
+  }
+}
+
+function setImgResult(state,eyebrow,main,sub){
+  const card = document.getElementById('imgResultCard');
+  card.className = 'result-card '+(state==='success'?'result-success':state==='error'?'result-error':'result-idle');
+  document.getElementById('imgEyebrow').textContent = eyebrow;
+  document.getElementById('imgMain').textContent = main;
+  document.getElementById('imgSub').textContent = sub;
+}
+
+async function runSensorAPI(){
+  const raw = document.getElementById('sensorInput').value;
+  let data;
+  try{ data = JSON.parse(raw); }catch(e){ setSensorResult('error','JSON tidak valid','Parse Error','Periksa format array Anda'); return;}
+  if(!Array.isArray(data)||data.length<2){ setSensorResult('error','Data tidak cukup','Data Error','Minimal 2 entri diperlukan'); return; }
+  const btn = document.getElementById('sensorBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Memprediksi...';
+  setSensorResult('loading','Mengirim ke model LSTM...','...','Memproses data sensor');
+  document.getElementById('sensorDetails').style.display = 'none';
+  const t0 = Date.now();
+  try{
+    const r = await fetch(getBase()+'/predict-sensor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({history:data})});
+    const d = await r.json();
+    const ms = ((Date.now()-t0)/1000).toFixed(2);
+    if(d.status==='success'){
+      const val = parseFloat(d.prediksi_kelembapan_selanjutnya);
+      const st = getSensorStatus(val);
+      const card = document.getElementById('sensorResultCard');
+      card.className = 'result-card '+st.cls;
+      document.getElementById('sensorEyebrow').textContent = 'Prediksi 30 menit ke depan';
+      document.getElementById('sensorMain').textContent = val.toFixed(1)+'%';
+      document.getElementById('sensorSub').textContent = st.label+' — '+st.rec;
+      document.getElementById('sRekomendasi').textContent = st.rec;
+      document.getElementById('sTime').textContent = ms+'s';
+      document.getElementById('sCount').textContent = data.length+' entri';
+      document.getElementById('sensorDetails').style.display = 'block';
+      document.getElementById('lstmBadge').className = 'badge '+st.badge;
+      document.getElementById('lstmBadge').textContent = st.label;
+      updateGauge(val);
+      document.getElementById('dashLastPred').textContent = val.toFixed(1)+'%';
+      document.getElementById('dashPredStatus').textContent = st.label+' · LSTM';
+      document.getElementById('dashPredStatus').style.color = val<60?'var(--amber)':val<=75?'var(--green-500)':'#185fa5';
+      addHistory('LSTM',val.toFixed(1)+'%',st.rec,ms+'s');
+    } else { throw new Error(d.error||'Status tidak diketahui'); }
+  }catch(e){
+    setSensorResult('error','Gagal terhubung','— Error —',e.message||'Pastikan Flask berjalan');
+    document.getElementById('lstmBadge').className = 'badge badge-red';
+    document.getElementById('lstmBadge').textContent = 'Error';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-chart-arrows-vertical" aria-hidden="true"></i> Prediksi 30 Menit ke Depan';
+  }
+}
+
+function setSensorResult(state,eyebrow,main,sub){
+  const card = document.getElementById('sensorResultCard');
+  card.className = 'result-card '+(state==='success'?'result-success':state==='error'?'result-error':'result-idle');
+  document.getElementById('sensorEyebrow').textContent = eyebrow;
+  document.getElementById('sensorMain').textContent = main;
+  document.getElementById('sensorSub').textContent = sub;
+}
+
+function updateGauge(val){
+  const pct = Math.min(100,Math.max(0,val))/100;
+  const totalLen = Math.PI*75;
+  const dashLen = pct*totalLen;
+  const bar = document.getElementById('gaugeBar');
+  bar.style.strokeDasharray = totalLen;
+  bar.style.strokeDashoffset = totalLen-dashLen;
+  bar.style.stroke = val<60?'#ba7517':val<=75?'#1d9e75':'#185fa5';
+  document.getElementById('gaugeVal').textContent = val.toFixed(1);
+  const gl = document.getElementById('gaugeLabel');
+  if(val<60){gl.textContent='Kering — perlu penyiraman';gl.style.color='var(--amber)';}
+  else if(val<=75){gl.textContent='Kondisi ideal';gl.style.color='var(--green-600)';}
+  else{gl.textContent='Basah — kurangi penyiraman';gl.style.color='#185fa5';}
+}
+
+function parseLive(){
+  try{
+    const data = JSON.parse(document.getElementById('sensorInput').value);
+    if(Array.isArray(data)&&data.length>0){
+      const last = data[data.length-1];
+      const h = parseFloat(last[0]), t = parseFloat(last[1]);
+      document.getElementById('sLiveHumid').textContent = h.toFixed(1)+'%';
+      document.getElementById('sLiveTemp').textContent = t.toFixed(1)+'°C';
+      document.getElementById('dashHumid').textContent = h.toFixed(1)+'%';
+      document.getElementById('dashTemp').textContent = t.toFixed(1)+'°C';
+      updateGauge(h);
+      buildLogTable(data);
+      buildChart(data);
+    }
+  }catch(e){}
+}
+
+function buildLogTable(data){
+  const tbody = document.getElementById('logTableBody');
+  tbody.innerHTML = '';
+  data.forEach((row,i)=>{
+    const h = parseFloat(row[0]), t = parseFloat(row[1]);
+    const st = h<60?'pill-kering':h<=75?'pill-ideal':'pill-basah';
+    const stLabel = h<60?'Kering':h<=75?'Ideal':'Basah';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${i+1}</td><td>${h.toFixed(1)}%</td><td>${t.toFixed(1)}°C</td><td><span class="pill ${st}">${stLabel}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function buildChart(data){
+  const labels = data.map((_,i)=>'T-'+(data.length-1-i));
+  const humids = data.map(r=>parseFloat(r[0]));
+  const temps = data.map(r=>parseFloat(r[1]));
+  if(trendChart) trendChart.destroy();
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  trendChart = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {label:'Kelembapan (%)',data:humids,borderColor:'#1d9e75',backgroundColor:'rgba(29,158,117,0.06)',pointBackgroundColor:'#1d9e75',tension:0.4,yAxisID:'yH',pointRadius:4,borderWidth:2},
+        {label:'Suhu (°C)',data:temps,borderColor:'#ba7517',backgroundColor:'rgba(186,117,23,0.06)',pointBackgroundColor:'#ba7517',tension:0.4,yAxisID:'yT',pointRadius:4,borderWidth:2}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11,family:"'Inter',sans-serif"},color:'#7a8c7f',boxWidth:12,padding:16}},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#b0bcb5',font:{size:10}}},
+        yH:{type:'linear',position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#1d9e75',font:{size:10}},title:{display:true,text:'Kelembapan %',color:'#1d9e75',font:{size:10}}},
+        yT:{type:'linear',position:'right',grid:{drawOnChartArea:false},ticks:{color:'#ba7517',font:{size:10}},title:{display:true,text:'Suhu °C',color:'#ba7517',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function addHistory(type,result,detail,latency){
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+  predHistory.unshift({time:t,type,result,detail,latency});
+  
+  // OTOMATISASI MYSQL: Kirim data hasil prediksi ke rute Laravel
+  fetch('/simpan-riwayat', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+      },
+      body: JSON.stringify({
+          jenis_fitur: type,
+          hasil_prediksi: result,
+          tingkat_akurasi: type === 'CNN' ? parseFloat(detail.replace(/[^0-9.]/g, '')) : null
+      })
+  }).then(res => res.json()).then(data => console.log(data.message));
+
+  const tbody = document.getElementById('histBody');
+  tbody.innerHTML='';
+  if(predHistory.length===0){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-faint)">Belum ada riwayat prediksi</td></tr>';
+    return;
+  }
+  predHistory.forEach(h=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${h.time}</td><td><span class="badge ${h.type==='CNN'?'badge-green':'badge-teal'}">${h.type}</span></td><td><strong>${h.result}</strong></td><td style="color:var(--text-muted);font-family:var(--font)">${h.detail}</td><td>${h.latency}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function clearHistory(){
+  predHistory.length=0;
+  document.getElementById('histBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-faint)">Belum ada riwayat prediksi</td></tr>';
+}
+
+document.getElementById('sensorInput').addEventListener('input',parseLive);
+window.addEventListener('load',()=>{
+  const bar = document.getElementById('gaugeBar');
+  const totalLen = Math.PI*75;
+  bar.style.strokeDasharray = totalLen;
+  bar.style.strokeDashoffset = totalLen;
+  parseLive();
+});
+</script>
+</body>
+</html>
