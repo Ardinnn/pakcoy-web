@@ -1,0 +1,4 @@
+0 siap-panen
+1 mendekati-panen
+2 bukan-pakcoy
+3 belum-siap-panen
